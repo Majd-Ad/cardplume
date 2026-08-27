@@ -103,7 +103,16 @@ export async function signUp(email, password, name) {
   const { data, error } = await db.auth.signUp({
     email: address,
     password,
-    options: { data: { name: String(name || '').trim().slice(0, 60) || address.split('@')[0] } },
+    options: {
+      data: { name: String(name || '').trim().slice(0, 60) || address.split('@')[0] },
+      /* Without this the confirmation link goes wherever the dashboard's Site URL points,
+         which is one address for a project that runs on at least three — localhost, the
+         Vercel preview, and the live domain. Someone who signs up on one of them and lands
+         on another has confirmed an account they cannot see. Sending them back to the origin
+         they actually used costs one line; the origin still has to be on Supabase's redirect
+         allow-list, which is matched exactly, so the port here is not negotiable. */
+      emailRedirectTo: `${window.location.origin}/studio`,
+    },
   });
   if (error) throw new Error(readable(error));
 
