@@ -49,7 +49,7 @@ export const stampIcons = [
 export const kindLabels = { text: 'Text', icon: 'Icon', qr: 'QR code', image: 'Image', shape: 'Shape', blob: 'Circle', stamps: 'Stamp row', counter: 'Counter', stampCount: 'Visit count' };
 
 /* Bumped whenever a stock element is added, so an old draft can be topped up exactly once. */
-export const MODEL_VERSION = 2;
+export const MODEL_VERSION = 3;
 
 let seed = 0;
 export const newId = () => `el${Date.now().toString(36)}${(seed += 1).toString(36)}`;
@@ -59,8 +59,12 @@ export const newId = () => `el${Date.now().toString(36)}${(seed += 1).toString(3
 const mono = { font: 'DM Mono', size: 3.02, weight: 400, letterSpacing: 0.6 };
 const display = { font: 'Space Grotesk', weight: 700 };
 
+/* `fit` is on for every stock element and off for anything the user adds later. A stock
+   layout is measured for the sample copy it ships with, so real content — which is always
+   longer than "Amara Faye" — has to be allowed to shrink rather than wrap into the line
+   below it. A text box somebody drew themselves is expected to wrap like a text box. */
 function element(overrides) {
-  return { id: newId(), kind: 'text', side: 'front', x: 4.78, y: 10, w: 40, rotation: 0, hidden: false, locked: false, style: {}, ...overrides };
+  return { id: newId(), kind: 'text', side: 'front', x: 4.78, y: 10, w: 40, rotation: 0, hidden: false, locked: false, fit: true, style: {}, ...overrides };
 }
 
 /* The accent circle. It used to be a CSS pseudo-element painted onto every card, which meant
@@ -194,10 +198,16 @@ export function qrPalette(design) {
    parallel maps (textPositions / hiddenLayers / layerStyles). Fold all of that into elements
    so old drafts open with their edits intact instead of silently resetting. */
 export function migrateDesign(input) {
-  const wasStamped = input?.v === MODEL_VERSION;
+  /* Each top-up is gated on the version the draft was actually saved at, not on "is this the
+     current version", so adding a new one never re-runs an older one over a draft that has
+     already been through it — and never undoes an edit that top-up was made to allow. */
+  const saved = Number(input?.v) || 0;
   const design = { ...initialDesign, ...input, v: MODEL_VERSION };
   if (Array.isArray(design.elements) && design.elements.length) {
-    return normalise(wasStamped ? design : withAccentBlob(design));
+    let next = design;
+    if (saved < 2) next = withAccentBlob(next);
+    if (saved < 3) next = withFitText(next);
+    return normalise(next);
   }
   const elements = defaultElements(design.type);
   const positions = design.textPositions || {};
@@ -246,6 +256,19 @@ function withAccentBlob(design) {
       ...missing.map((side, index) => ({ ...accentBlob(side), z: index + 1 })),
       ...design.elements.map((item) => ({ ...item, z: (item.z || 0) + missing.length })),
     ],
+  };
+}
+
+/* Stock elements in a draft saved before text could shrink were laid out on the assumption
+   that it never would, so a long name in one of those drafts is still sitting on top of the
+   job title. Switch them over once. Elements the reader added themselves are left wrapping,
+   and an explicit choice either way is never overwritten. */
+let stockIds = null;
+function withFitText(design) {
+  stockIds = stockIds || new Set([...defaultElements('Business'), ...defaultElements('Loyalty')].map((item) => item.id));
+  return {
+    ...design,
+    elements: design.elements.map((item) => (item.fit === undefined && stockIds.has(item.id) ? { ...item, fit: true } : item)),
   };
 }
 

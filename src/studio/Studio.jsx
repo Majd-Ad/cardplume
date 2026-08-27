@@ -881,6 +881,12 @@ function ElementsPanel({ design, elements, selection, setSelection, selected, up
         <div className="form-field"><label>Weight</label><div className="choice-row">{[400, 500, 600, 700].map((weight) => <button key={weight} className={style.weight === weight ? 'selected' : ''} onClick={() => updateStyle(selected.id, { weight: style.weight === weight ? '' : weight })}>{weight}</button>)}</div></div>
         <div className="form-field"><label>Align</label><div className="choice-row">{['left', 'center', 'right'].map((align) => <button key={align} className={(style.align || 'left') === align ? 'selected' : ''} onClick={() => updateStyle(selected.id, { align })}>{align}</button>)}</div></div>
         <div className="form-field"><label>Letter spacing <span>{style.letterSpacing ?? 0}px</span></label><input type="range" min="-4" max="12" step="0.5" value={style.letterSpacing ?? 0} onChange={(event) => updateStyle(selected.id, { letterSpacing: Number(event.target.value) || '' })} /></div>
+        {/* What a long name should cost: its type size, or the line below it. Stock elements
+            shrink, because the layout around them was drawn for one line. */}
+        {isTextual(selected) && <div className="form-field"><label>Text too long</label><div className="choice-row fit-choice">
+          <button className={selected.fit ? 'selected' : ''} onClick={() => updateElement(selected.id, { fit: true })}>Shrink to fit</button>
+          <button className={selected.fit ? '' : 'selected'} onClick={() => updateElement(selected.id, { fit: false })}>Wrap</button>
+        </div></div>}
       </>}
 
       {!isBoxed(selected) || isDecor(selected) ? <div className="form-field"><label>Colour</label><div className="hex-color-field"><input aria-label="Element colour" type="color" value={style.color || design.ink} onChange={(event) => updateStyle(selected.id, { color: event.target.value })} /><input aria-label="Element colour value" value={style.color || ''} placeholder="Card default" maxLength="7" onChange={(event) => updateStyle(selected.id, { color: event.target.value === '' ? '' : (/^#[0-9a-fA-F]{6}$/.test(event.target.value) ? event.target.value : style.color) })} /></div></div> : null}
