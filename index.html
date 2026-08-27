@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#17221d" />
+  <meta name="description"
+    content="Cardplume is the design-first platform for business cards and café loyalty cards." />
+  <title>Cardplume — Cards with character</title>
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2317221d'/%3E%3Crect x='3.4' y='11.2' width='17.4' height='12.2' rx='2.6' fill='%23f6f3ec'/%3E%3Cpath d='M12.6 23.2C14.9 15.4 20.1 8.8 27.6 5.1c-1.6 8.4-6.4 15-15 18.1Z' fill='%23d9fb8f' stroke='%2317221d' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M13 23.1C17.3 18 22.1 11.5 27 5.7' stroke='%2317221d' stroke-width='1.3' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='12.7' cy='23.2' r='1.9' fill='%23ff7947' stroke='%2317221d' stroke-width='1.2'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Playfair+Display:wght@600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" crossorigin="anonymous" />
+  <style>
+    /* ---------------------------------------------------------------------------
+       Intro: a blank card, and the plume signs the brand onto it.
+
+       Written inline, in CSS only, on purpose. It has to paint before the JS bundle
+       lands — that is the whole job of a preloader — and the site's CSP allows inline
+       styles but not inline scripts, so nothing here may depend on JS. The one piece
+       of script involved is the dismissal in src/main.jsx, which fades .cp-loader out
+       once React has mounted; if that never happens, cp-failsafe clears the screen on
+       its own after 12s rather than leaving a visitor staring at a card forever.
+
+       The ink is one continuous stroke drawn with stroke-dashoffset, and the quill is
+       carried along the same line by cp-pen — 110 points sampled off that exact path,
+       so the nib sits on the tip of the ink rather than near it. Both run linear for
+       the same 2s, which is what keeps them together. If the wordmark path is ever
+       redrawn, the cp-pen keyframes have to be re-sampled from it.
+       --------------------------------------------------------------------------- */
+    .cp-loader{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;overflow:hidden;background:#17221d;animation:cp-failsafe .6s linear 12s both}
+    .cp-loader:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 43%,rgba(217,251,143,.15),transparent 58%)}
+    /* The exit is an animation rather than a transition so that it replaces cp-failsafe on
+       this element: the failsafe already owns opacity here, and a property under an
+       animation's control ignores transitions. */
+    .cp-loader.is-out{pointer-events:none;animation:cp-out .5s ease both}
+    @keyframes cp-failsafe{to{opacity:0;visibility:hidden}}
+    @keyframes cp-out{to{opacity:0;transform:scale(1.04)}}
+    body:has(.cp-loader){overflow:hidden}
+    .cp-stage{display:grid;position:relative;justify-items:center;gap:27px;width:min(78vw,430px)}
+    .cp-card{display:grid;position:relative;place-items:center;width:100%;aspect-ratio:1.7;border-radius:12px;background:#f6f3ec;box-shadow:0 30px 60px rgba(0,0,0,.45);animation:cp-card-in .8s cubic-bezier(.22,1,.36,1) both}
+    /* the hairline a printer would call the safe area — it makes the blank card read as stock */
+    .cp-card:after{content:"";position:absolute;inset:10px;border:1px solid rgba(23,34,29,.09);border-radius:7px}
+    @keyframes cp-card-in{from{opacity:0;transform:translateY(30px) rotate(-3.5deg) scale(.92)}to{opacity:1;transform:none}}
+    /* overflow stays visible so the plume can rise off the top edge of the card */
+    .cp-write{width:84%;overflow:visible}
+    .cp-ink{fill:none;stroke:#17221d;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:cp-draw 2s linear .55s both}
+    .cp-swash{fill:none;stroke:#d9fb8f;stroke-width:27;stroke-linecap:round;opacity:.62;stroke-dasharray:1;stroke-dashoffset:1;animation:cp-draw .55s cubic-bezier(.4,0,.2,1) 2.45s both}
+    @keyframes cp-draw{to{stroke-dashoffset:0}}
+    /* transform-box/origin pinned so the pen turns around its own nib: the CSS default for
+       SVG elements is the middle of the view box, which would swing the quill across the card */
+    .cp-quill,.cp-quill-lift{transform-box:view-box;transform-origin:0 0}
+    .cp-quill{animation:cp-pen 2s linear .55s both}
+    /* one animation, not two: fade-in and lift-off both touch transform, and a second
+       animation with fill:both would backwards-fill over the first one from t=0 */
+    .cp-quill-lift{animation:cp-quill-life 3.15s ease both}
+    @keyframes cp-quill-life{0%{opacity:0;transform:translate(52px,-62px)}17%{opacity:1;transform:none}81%{opacity:1;transform:none}100%{opacity:0;transform:translate(78px,-124px) rotate(12deg)}}
+    .cp-plume{fill:#d9fb8f;stroke:#17221d;stroke-width:6;stroke-linejoin:round}
+    .cp-spine{fill:none;stroke:#17221d;stroke-width:5;stroke-linecap:round}
+    .cp-nib{fill:#ff7947;stroke:#17221d;stroke-width:4}
+    .cp-tag{margin:0;color:rgba(246,243,236,.6);font:11px/1 'DM Mono',ui-monospace,monospace;letter-spacing:2.6px;animation:cp-fade-up .6s ease 2.65s both}
+    @keyframes cp-fade-up{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+    .cp-bar{width:132px;height:2px;overflow:hidden;border-radius:2px;background:rgba(246,243,236,.14)}
+    .cp-bar i{display:block;width:0;height:100%;background:#d9fb8f;animation:cp-bar 3.1s cubic-bezier(.45,0,.15,1) .2s both}
+    @keyframes cp-bar{to{width:100%}}
+    @keyframes cp-pen{
+  0%{transform:translate(106px,84px)}0.91%{transform:translate(88.6px,72.2px)}1.82%{transform:translate(67.4px,74.7px)}2.73%{transform:translate(52.6px,90px)}
+  3.64%{transform:translate(51.1px,111.3px)}4.55%{transform:translate(63.9px,128.1px)}5.45%{transform:translate(85.1px,130.5px)}6.36%{transform:translate(104px,120.2px)}
+  7.27%{transform:translate(116.6px,103px)}8.18%{transform:translate(127.7px,84.4px)}9.09%{transform:translate(147.7px,77.1px)}10%{transform:translate(151.8px,71.5px)}
+  10.91%{transform:translate(131.4px,73.9px)}11.82%{transform:translate(121px,92.5px)}12.73%{transform:translate(122px,113.9px)}13.64%{transform:translate(136.2px,129.4px)}
+  14.55%{transform:translate(156.9px,126.7px)}15.45%{transform:translate(166.5px,108px)}16.36%{transform:translate(166.8px,86.3px)}17.27%{transform:translate(164.7px,95.3px)}
+  18.18%{transform:translate(164.9px,117.1px)}19.09%{transform:translate(175.8px,131.4px)}20%{transform:translate(192.5px,119.2px)}20.91%{transform:translate(200.5px,99px)}
+  21.82%{transform:translate(208.6px,78.9px)}22.73%{transform:translate(220px,88px)}23.64%{transform:translate(236.2px,93px)}24.55%{transform:translate(236.1px,114.7px)}
+  25.45%{transform:translate(241.1px,131.5px)}26.36%{transform:translate(258px,118.8px)}27.27%{transform:translate(267.4px,99.3px)}28.18%{transform:translate(280.9px,82.9px)}
+  29.09%{transform:translate(301.9px,80.2px)}30%{transform:translate(293.8px,71.4px)}30.91%{transform:translate(274.6px,79.1px)}31.82%{transform:translate(268.1px,99.6px)}
+  32.73%{transform:translate(273.1px,120.4px)}33.64%{transform:translate(291.2px,130.8px)}34.55%{transform:translate(309.9px,121.7px)}35.45%{transform:translate(313.6px,100.7px)}
+  36.36%{transform:translate(309.5px,79.4px)}37.27%{transform:translate(309px,57.7px)}38.18%{transform:translate(319.4px,39.8px)}39.09%{transform:translate(323.5px,57.8px)}
+  40%{transform:translate(318.3px,78.9px)}40.91%{transform:translate(313.9px,100.2px)}41.82%{transform:translate(310.5px,121.7px)}42.73%{transform:translate(324.7px,128.4px)}
+  43.64%{transform:translate(337.3px,111.1px)}44.55%{transform:translate(346.6px,91.5px)}45.45%{transform:translate(351.2px,89px)}46.36%{transform:translate(349.1px,110.6px)}
+  47.27%{transform:translate(346.7px,132.3px)}48.18%{transform:translate(344px,153.8px)}49.09%{transform:translate(342.5px,175.3px)}50%{transform:translate(353px,164.8px)}
+  50.91%{transform:translate(354.9px,143.1px)}51.82%{transform:translate(355.7px,121.4px)}52.73%{transform:translate(356px,99.7px)}53.64%{transform:translate(361.2px,80.9px)}
+  54.55%{transform:translate(382.2px,82.3px)}55.45%{transform:translate(394px,99.6px)}56.36%{transform:translate(386.4px,119px)}57.27%{transform:translate(366.1px,124.6px)}
+  58.18%{transform:translate(369.5px,128.1px)}59.09%{transform:translate(386.2px,118.2px)}60%{transform:translate(392.8px,97.5px)}60.91%{transform:translate(398.7px,76.5px)}
+  61.82%{transform:translate(404.6px,55.6px)}62.73%{transform:translate(413.6px,36.5px)}63.64%{transform:translate(419.3px,54.1px)}64.55%{transform:translate(415.4px,75.5px)}
+  65.45%{transform:translate(411.2px,96.8px)}66.36%{transform:translate(408.2px,118.4px)}67.27%{transform:translate(420.6px,129.2px)}68.18%{transform:translate(434.3px,113px)}
+  69.09%{transform:translate(442.6px,92.9px)}70%{transform:translate(443.8px,92.1px)}70.91%{transform:translate(440.4px,113.5px)}71.82%{transform:translate(449.5px,130.7px)}
+  72.73%{transform:translate(466.3px,119.3px)}73.64%{transform:translate(473.9px,99px)}74.55%{transform:translate(477.5px,86.2px)}75.45%{transform:translate(475.2px,107.8px)}
+  76.36%{transform:translate(476.1px,128.8px)}77.27%{transform:translate(495.4px,124.6px)}78.18%{transform:translate(505.1px,105.2px)}79.09%{transform:translate(514.1px,85.4px)}
+  80%{transform:translate(530.4px,84.2px)}80.91%{transform:translate(534.8px,105.3px)}81.82%{transform:translate(534px,127px)}82.73%{transform:translate(539.7px,108.1px)}
+  83.64%{transform:translate(548px,88px)}84.55%{transform:translate(564.5px,81.5px)}85.45%{transform:translate(570.6px,101.9px)}86.36%{transform:translate(570.2px,123.6px)}
+  87.27%{transform:translate(574.6px,111.3px)}88.18%{transform:translate(582.5px,91px)}89.09%{transform:translate(597.9px,79.4px)}90%{transform:translate(606.3px,98.6px)}
+  90.91%{transform:translate(606.4px,120.3px)}91.82%{transform:translate(617.9px,132.5px)}92.73%{transform:translate(634.1px,118.6px)}93.64%{transform:translate(646.2px,100.5px)}
+  94.55%{transform:translate(660.1px,83.9px)}95.45%{transform:translate(661px,97.1px)}96.36%{transform:translate(647.1px,113.5px)}97.27%{transform:translate(656.2px,130.5px)}
+  98.18%{transform:translate(676.9px,126.2px)}99.09%{transform:translate(693.3px,112px)}100%{transform:translate(708px,96px)}
+    }
+    /* Reduced motion: same card, same signature, nothing moves — the loader is simply
+       the finished frame, and main.jsx clears it as soon as React is up. */
+    @media (prefers-reduced-motion:reduce){
+      .cp-card,.cp-ink,.cp-swash,.cp-tag,.cp-bar i,.cp-quill,.cp-quill-lift{animation:none}
+      .cp-ink,.cp-swash{stroke-dashoffset:0}
+      .cp-bar i{width:100%}
+      .cp-quill-lift{opacity:0}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="cp-loader" id="cardplume-loader" role="status" aria-label="Cardplume is loading">
+    <div class="cp-stage">
+      <div class="cp-card">
+        <svg class="cp-write" viewBox="0 0 760 220" fill="none" aria-hidden="true">
+          <path class="cp-swash" pathLength="1" d="M 64 118 C 250 110 470 124 694 112" />
+          <path class="cp-ink" pathLength="1" d="M 106 84 C 100 72 78 66 62 78 C 46 90 46 116 62 127 C 76 136 96 130 106 118 C 114 114 118 96 126 86 C 134 78 148 74 158 80 C 156 68 136 64 126 80 C 117 94 118 116 130 126 C 142 135 158 131 164 118 C 168 108 168 92 166 80 C 164 96 164 114 166 128 C 172 134 182 132 190 124 C 198 110 202 92 208 80 C 212 72 222 76 220 88 C 226 82 234 84 236 92 C 238 104 236 118 234 128 C 238 134 246 132 254 124 C 262 116 266 98 274 88 C 282 80 296 76 306 82 C 304 70 284 66 274 80 C 265 94 266 116 278 126 C 290 135 306 131 312 118 C 315 108 314 94 310 82 C 306 62 310 46 316 42 C 322 36 328 42 324 56 C 318 78 312 106 310 126 C 314 134 322 132 330 124 C 338 112 346 92 352 80 C 350 104 346 142 342 168 C 340 180 350 182 352 172 C 356 146 356 112 356 84 C 368 74 392 80 394 100 C 396 118 376 131 358 122 C 366 130 376 130 384 124 C 392 104 400 70 408 44 C 412 32 422 34 420 50 C 416 76 408 106 408 124 C 410 133 420 132 428 124 C 436 112 442 96 446 82 C 442 100 438 118 442 126 C 448 134 460 132 466 120 C 472 106 476 94 478 82 C 476 100 474 116 474 126 C 478 134 488 132 496 124 C 504 110 510 92 516 82 C 523 74 532 80 534 96 C 536 110 534 120 534 128 C 538 112 544 92 552 82 C 559 74 568 80 570 96 C 572 110 570 120 570 128 C 574 112 580 92 588 82 C 595 74 604 80 606 96 C 608 110 606 120 606 128 C 610 136 620 134 628 126 C 638 116 648 94 660 84 C 668 78 670 90 658 100 C 648 108 642 118 650 127 C 658 135 674 131 686 119 C 692 113 700 106 708 96" />
+          <g class="cp-quill">
+            <g class="cp-quill-lift">
+              <path class="cp-plume" d="M-0.5 0.6C7.3 -44.2 32.5 -83.8 72.7 -109.2C68.5 -61.5 45.5 -22.2 -0.5 0.6Z" />
+              <path class="cp-spine" d="M1.6 -0.7C22.2 -31.1 45.3 -70.5 69.8 -105.6" />
+              <circle class="cp-nib" cx="0" cy="0" r="7.5" />
+            </g>
+          </g>
+        </svg>
+      </div>
+      <p class="cp-tag">CARDS WITH CHARACTER</p>
+      <div class="cp-bar"><i></i></div>
+    </div>
+  </div>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

@@ -1,0 +1,65 @@
+<!-- Cardplume — "Confirm signup" template
+     Paste into: Supabase Dashboard -> Authentication -> Emails -> Confirm signup
+     Subject:    Confirm your Cardplume account
+
+     Built the boring way on purpose: tables, inline styles, no external images and no web
+     fonts. Gmail and Outlook strip <style> blocks and block remote images by default, so
+     anything clever here would arrive as unstyled text. The one link is a real <a>, because a
+     button drawn with CSS is exactly what a spam filter dislikes. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0;padding:0;background:#f6f3ec;">
+  <tr>
+    <td align="center" style="padding:40px 16px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border:1px solid rgba(23,34,29,.14);border-radius:12px;">
+        <tr>
+          <td style="padding:36px 36px 0;font-family:Helvetica,Arial,sans-serif;">
+            <p style="margin:0;font-size:19px;font-weight:700;letter-spacing:-.6px;color:#17221d;">
+              card<span style="font-style:italic;color:#ff7947;">verse</span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:26px 36px 0;font-family:Helvetica,Arial,sans-serif;">
+            <h1 style="margin:0 0 14px;font-size:27px;line-height:1.15;letter-spacing:-1.1px;color:#17221d;">
+              One click and you’re in.
+            </h1>
+            <p style="margin:0 0 26px;font-size:15px;line-height:1.6;color:#5f6a63;">
+              Confirm this address and your Cardplume account is ready. Your saved cards will
+              open on any device you sign in on.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 36px;">
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="border-radius:999px;background:#17221d;">
+                  <a href="{{ .ConfirmationURL }}"
+                     style="display:inline-block;padding:14px 28px;font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:700;color:#d9fb8f;text-decoration:none;">
+                    Confirm my email
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:26px 36px 36px;font-family:Helvetica,Arial,sans-serif;">
+            <p style="margin:0 0 8px;font-size:12px;line-height:1.6;color:#7d877f;">
+              If the button does nothing, paste this into your browser:
+            </p>
+            <p style="margin:0 0 22px;font-size:12px;line-height:1.5;word-break:break-all;color:#5f6a63;">
+              {{ .ConfirmationURL }}
+            </p>
+            <p style="margin:0;padding-top:20px;border-top:1px solid rgba(23,34,29,.12);font-size:12px;line-height:1.6;color:#7d877f;">
+              Didn’t sign up? Ignore this email — nothing was created, and nobody can use this
+              link but you.
+            </p>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:20px 0 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;color:#98a199;">
+        Cardplume · free card design in your browser
+      </p>
+    </td>
+  </tr>
+</table>
