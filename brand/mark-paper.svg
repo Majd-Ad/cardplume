@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <!-- Light variant of the same mark, for a feed that reads better against a pale avatar.
+       The card flips to ink so it still carries weight once the circle crop shrinks it. -->
+  <rect width="1080" height="1080" fill="#f6f3ec"/>
+  <g transform="translate(90.5,88) scale(29)">
+    <rect x="3.4" y="11.2" width="17.4" height="12.2" rx="2.6" fill="#17221d"/>
+    <path d="M12.6 23.2C14.9 15.4 20.1 8.8 27.6 5.1c-1.6 8.4-6.4 15-15 18.1Z" fill="#d9fb8f" stroke="#17221d" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="M13 23.1C17.3 18 22.1 11.5 27 5.7" stroke="#17221d" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+    <circle cx="12.7" cy="23.2" r="1.9" fill="#ff7947" stroke="#17221d" stroke-width="1.2"/>
+  </g>
+</svg>
