@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { Brand, Button, DonateButton, Icon, SectionLabel } from './ui';
-import { CONTACT_EMAIL, DONATE_URL, SOCIAL_HANDLE, SOCIAL_INSTAGRAM } from './config';
+import { Brand, Button, Icon, SectionLabel } from './ui';
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_WHATSAPP, DONATE_URL, SOCIAL_HANDLE, SOCIAL_INSTAGRAM, SUPPORT_METHODS } from './config';
 import CardCanvas from './studio/CardCanvas';
 import CardStudio from './studio/Studio';
 import { applyTemplate, initialDesign, templates } from './studio/model';
@@ -52,7 +52,7 @@ function ScrollProgress() {
 function HeroDeck() {
   const deck = useMemo(() => [
     { label: 'Midnight gold', design: applyTemplate({ ...initialDesign, name: 'Cardplume', role: 'Design studio', website: 'cardplume.tech', email: 'hello@cardplume.tech', logoText: 'CP' }, templates.find((item) => item.id === 'noir')) },
-    { label: 'Business card', design: applyTemplate({ ...initialDesign, name: 'Majdoubi Abdessamad', role: 'Creative director', website: 'cardplume.tech' }, templates.find((item) => item.id === 'studio')) },
+    { label: 'Business card', design: applyTemplate({ ...initialDesign, name: 'Abdessamad Majdoubi', role: 'Creative director', website: 'cardplume.tech' }, templates.find((item) => item.id === 'studio')) },
     { label: 'Loyalty card', design: applyTemplate({ ...initialDesign, brand: 'ROAST & RITUAL', reward: 'Free coffee after 8 visits', stamps: 5 }, templates.find((item) => item.id === 'coffee')) },
     { label: 'Membership card', design: applyTemplate({ ...initialDesign, name: 'Studio Nord', role: 'Member since 2026', website: 'cardplume.tech' }, templates.find((item) => item.id === 'member')) },
   ], []);
@@ -187,6 +187,72 @@ function LoyaltySection({ onOpenStudio }) { return <section className="loyalty-s
 
 function Steps() { return <section className="steps-section"><div className="shell"><div className="steps-heading"><div><SectionLabel>FROM IDEA TO HAND</SectionLabel><h2>Good things<br />come in <em>small formats.</em></h2></div><p>Whether you are launching a brand or rewarding your hundredth regular, the first version is only a few thoughtful choices away.</p></div><div className="steps-list">{[['01', 'Choose your canvas', 'Pick a card type, then start with a mood, a template, or a completely blank space.'], ['02', 'Make every detail yours', 'Bring in your logo, image, colors, and the exact words you want people to remember.'], ['03', 'Put it out into the world', 'Export for print, share online, or build a loyalty experience your customers can save.']].map(([number, title, text]) => <article key={number}><span>{number}</span><h3>{title}</h3><p>{text}</p><Icon name="arrow" size={19} /></article>)}</div></div></section>; }
 
+/* One button per route rather than one checkout, because no single processor reaches
+   everyone. A Moroccan debit card is issued for domestic use and gets turned away by a
+   foreign checkout; a donor in Berlin cannot walk into a Cash Plus branch. Splitting the
+   ask by where the donor is means neither of them hits a wall.
+
+   Routes with nothing filled in are left out, and a heading disappears with its last
+   route — so this grows on its own as accounts in config.js come online. */
+function SupportMethods() {
+  const [copied, setCopied] = useState('');
+
+  /* The confirmation is a label swap, not a toast, so it undoes itself. */
+  useEffect(() => {
+    if (!copied) return undefined;
+    const timer = window.setTimeout(() => setCopied(''), 2200);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+
+  /* Clipboard access is refused outright on an insecure origin and in some embedded
+     browsers. The number stays on screen either way, so a failure costs the donor a
+     tap-and-hold rather than the route itself. */
+  const copy = async (method) => {
+    try {
+      await navigator.clipboard.writeText(method.copy);
+      setCopied(method.id);
+    } catch { setCopied(''); }
+  };
+
+  const ready = (method) => method.href || method.copy || method.soon;
+  const groups = [
+    ['FROM ANYWHERE', SUPPORT_METHODS.filter((method) => method.reach === 'world' && ready(method))],
+    ['FROM INSIDE MOROCCO', SUPPORT_METHODS.filter((method) => method.reach === 'morocco' && ready(method))],
+  ].filter(([, list]) => list.length > 0);
+
+  if (groups.length === 0) return <p className="plan-intro"><em>Support opens shortly.</em></p>;
+
+  /* A route that only opens the donor's mail client cannot be a new tab — target="_blank"
+     on a mailto leaves a blank window behind on most browsers. */
+  const away = (href) => (href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {});
+
+  return <div className="ways">
+    {groups.map(([heading, list]) => <div className="ways-group" key={heading}>
+      <span className="tiny-caps">{heading}</span>
+      {list.map((method) => {
+        if (method.soon) return <div className="way is-soon" key={method.id}>
+          <b>{method.name}</b><span>{method.note}</span><em>SOON</em>
+        </div>;
+        if (method.href) return <a className="way" key={method.id} href={method.href} {...away(method.href)}>
+          <b>{method.name}</b><span>{method.note}</span><Icon name="arrow" size={15} />
+        </a>;
+        return <button className="way" key={method.id} type="button" onClick={() => copy(method)}>
+          <b>{method.name}</b>
+          <span>{copied === method.id ? 'Copied to your clipboard' : `${method.note} ${method.copy}`}</span>
+          <Icon name={copied === method.id ? 'check' : 'copy'} size={15} />
+        </button>;
+      })}
+    </div>)}
+    {/* WhatsApp first because it is the one that always opens. The address beside it is
+        printed in full rather than hidden behind the word "email", so it is still useful
+        to read and copy on a machine where clicking a mailto does nothing. */}
+    <p className="ways-note">
+      Or reach me directly — <a href={CONTACT_WHATSAPP} target="_blank" rel="noopener noreferrer">WhatsApp {CONTACT_PHONE}</a>
+      {' · '}<a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+    </p>
+  </div>;
+}
+
 /* There are no plans and no paywall. Donations are the whole business model, so this page
    asks plainly instead of dressing an ask up as a pricing table. */
 function Support({ onOpenStudio }) {
@@ -211,14 +277,14 @@ function Support({ onOpenStudio }) {
       <article className="pricing-card featured">
         <div className="popular-tag">THANK YOU</div>
         <span className="plan-name">Give what you like</span>
-        <h3>Any amount<small> · one off</small></h3>
-        <p className="plan-intro">Checkout is handled entirely by Stripe. You choose the amount on their page, and no card details ever touch this site.</p>
-        {DONATE_URL
-          ? <DonateButton className="wide">Donate with Stripe</DonateButton>
-          : <p className="plan-intro"><em>Donations open shortly.</em></p>}
+        {/* Patreon bills monthly; every other route here is a single payment. Claiming one
+            of the two on a page offering both would be false for half the donors. */}
+        <h3>Any amount<small> · once or monthly</small></h3>
+        <p className="plan-intro">Take whichever route works where you are — you choose the amount on the other side, and no card details ever touch this site.</p>
+        <SupportMethods />
         <DonationGoal />
         <ul>
-          <li><Icon name="check" size={15} />No account, no subscription, no reminders</li>
+          <li><Icon name="check" size={15} />Stop whenever you like, from the provider’s own page</li>
           <li><Icon name="check" size={15} />Nothing changes about what you can use</li>
         </ul>
       </article>
@@ -277,6 +343,7 @@ function Contact({ onToast }) {
       <ul className="contact-lines">
         {line('mail', CONTACT_EMAIL, 'Email')}
         {line('at', SOCIAL_HANDLE, 'Instagram', SOCIAL_INSTAGRAM)}
+        {line('send', CONTACT_PHONE, 'WhatsApp', CONTACT_WHATSAPP)}
         {line('heart', 'Support Cardplume', 'Keep it free for everyone', DONATE_URL || undefined)}
       </ul>
     </div>
@@ -334,7 +401,7 @@ function CafeFlow({ onOpenStudio }) {
 }
 
 function RoutedFooter() {
-  return <footer className="site-footer"><div className="shell"><div className="footer-top"><div><Brand /><h2>Cards with<br /><em>character.</em></h2></div><Button to="/studio" className="button-light" icon="arrow">Make a card</Button></div><div className="footer-bottom"><span>© 2026 Cardplume. Made for independent ideas.</span><div>{DONATE_URL && <a href={DONATE_URL} target="_blank" rel="noopener noreferrer">Support Cardplume</a>}<a href={SOCIAL_INSTAGRAM} target="_blank" rel="noopener noreferrer">Instagram</a><Link to="/contact">Contact</Link><Link to="/faq">Help</Link></div></div></div></footer>;
+  return <footer className="site-footer"><div className="shell"><div className="footer-top"><div><Brand /><h2>Cards with<br /><em>character.</em></h2></div><Button to="/studio" className="button-light" icon="arrow">Make a card</Button></div><div className="footer-bottom"><span>© 2026 Cardplume. Made for independent ideas.</span><div>{/* the page, not one provider — a Moroccan card cannot pay whichever rail happens to be first */}<Link to="/support">Support Cardplume</Link><a href={SOCIAL_INSTAGRAM} target="_blank" rel="noopener noreferrer">Instagram</a><Link to="/contact">Contact</Link><Link to="/faq">Help</Link></div></div></div></footer>;
 }
 
 function HomePage({ onOpenStudio }) {

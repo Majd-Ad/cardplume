@@ -165,7 +165,7 @@ export function AuthDialog({ open, mode = 'login', onClose, onDone }) {
           <form onSubmit={submit} className="auth-form">
             {tab === 'signup' && <div className="form-field">
               <label htmlFor="auth-name">Your name</label>
-              <input id="auth-name" ref={tab === 'signup' ? firstField : null} value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" placeholder="Amara Faye" />
+              <input id="auth-name" ref={tab === 'signup' ? firstField : null} value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" placeholder="Abdessamad Majdoubi" />
             </div>}
             <div className="form-field">
               <label htmlFor="auth-email">Email</label>

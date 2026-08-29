@@ -60,9 +60,9 @@ const mono = { font: 'DM Mono', size: 3.02, weight: 400, letterSpacing: 0.6 };
 const display = { font: 'Space Grotesk', weight: 700 };
 
 /* `fit` is on for every stock element and off for anything the user adds later. A stock
-   layout is measured for the sample copy it ships with, so real content — which is always
-   longer than "Amara Faye" — has to be allowed to shrink rather than wrap into the line
-   below it. A text box somebody drew themselves is expected to wrap like a text box. */
+   layout is measured for the sample copy it ships with, so real content — which is often
+   longer than the name the box was sized around — has to be allowed to shrink rather than
+   wrap into the line below it. A text box somebody drew themselves wraps like a text box. */
 function element(overrides) {
   return { id: newId(), kind: 'text', side: 'front', x: 4.78, y: 10, w: 40, rotation: 0, hidden: false, locked: false, fit: true, style: {}, ...overrides };
 }
@@ -94,14 +94,14 @@ export function defaultElements(type = 'Business') {
       element({ id: 'shape', x: 61.85, y: 37.06, w: 34.18, kind: 'shape', rotation: -18 }),
       element({ id: 'logo', y: 7.39, w: 30, text: 'CP', bind: 'logoText', style: { ...mono } }),
       element({ id: 'counter', x: 65.57, y: 7.39, w: 30, text: '01 / 01', style: { ...mono, align: 'right' } }),
-      element({ id: 'title', y: 38.71, w: 58, text: 'Amara Faye', bind: 'name', style: { ...display, size: 15.79, letterSpacing: -2.4 } }),
+      element({ id: 'title', y: 38.71, w: 58, text: 'Abdessamad Majdoubi', bind: 'name', style: { ...display, size: 15.79, letterSpacing: -2.4 } }),
       element({ id: 'subtitle', y: 55.58, w: 55, text: 'Creative director', bind: 'role', style: { font: 'Space Grotesk', size: 4.37, weight: 400 } }),
       element({ id: 'footer', y: 89.13, w: 60, text: '', bind: 'website', uppercase: true, style: { ...mono } }),
     ];
   const back = [
     accentBlob('back'),
     element({ id: 'backLabel', side: 'back', y: 9.74, w: 40, text: "LET'S CONNECT", style: { ...mono, letterSpacing: 0.7 } }),
-    element({ id: 'backName', side: 'back', y: 20.16, w: 55, text: 'Amara Faye', bind: 'name', style: { ...display, size: 10.42, letterSpacing: -1.5 } }),
+    element({ id: 'backName', side: 'back', y: 20.16, w: 55, text: 'Abdessamad Majdoubi', bind: 'name', style: { ...display, size: 10.42, letterSpacing: -1.5 } }),
     element({ id: 'backRole', side: 'back', y: 30.72, w: 50, text: 'Creative director', bind: 'role', style: { font: 'Space Grotesk', size: 4.03, weight: 400 } }),
     element({ id: 'backEmail', side: 'back', x: 71.67, y: 57, w: 24, bind: 'email', style: { ...mono, letterSpacing: 0.3 } }),
     element({ id: 'backPhone', side: 'back', x: 71.67, y: 62.71, w: 24, bind: 'phone', style: { ...mono, letterSpacing: 0.3 } }),
@@ -121,7 +121,7 @@ export const initialDesign = {
   name: 'Abdessamad Majdoubi',
   role: 'Creative director',
   email: 'hello@cardplume.tech',
-  phone: '+212 723206749',
+  phone: '+212 600000000',
   website: 'cardplume.tech',
   brand: 'ROAST & RITUAL',
   reward: 'Free coffee after 8 visits',
