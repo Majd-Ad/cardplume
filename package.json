@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
+    "@vercel/analytics": "^2.0.1",
     "@vitejs/plugin-react": "latest",
     "dompurify": "^3.4.14",
     "html-to-image": "^1.11.13",
