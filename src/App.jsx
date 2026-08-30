@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { Brand, Button, Icon, SectionLabel } from './ui';
 import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_WHATSAPP, DONATE_URL, SOCIAL_HANDLE, SOCIAL_INSTAGRAM, SUPPORT_METHODS } from './config';
 import CardCanvas from './studio/CardCanvas';
@@ -449,5 +450,12 @@ function AppShell() {
 }
 
 export default function App() {
-  return <BrowserRouter><AccountProvider><AppShell /></AccountProvider></BrowserRouter>;
+  return (
+    <BrowserRouter>
+      <AccountProvider>
+        <AppShell />
+      </AccountProvider>
+      <Analytics />
+    </BrowserRouter>
+  );
 }
