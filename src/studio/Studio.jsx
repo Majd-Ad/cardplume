@@ -683,7 +683,9 @@ export default function CardStudio({ onToast, onRequireAccount }) {
     Details: <DetailsPanel design={design} update={update} />,
   };
 
-  return <section className="studio-section" id="studio"><div className="studio-shell">
+  /* /studio is a money page with no heading anywhere in it, because a tool does not need one
+     on screen. A page still needs exactly one h1, so it is here and out of the way. */
+  return <section className="studio-section" id="studio"><h1 className="sr-only">Free card design studio</h1><div className="studio-shell">
     <div className="studio-app">
       <aside className="studio-sidebar">
         <div className="studio-sidebar-top">

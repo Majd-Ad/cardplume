@@ -7,6 +7,7 @@ import CardStudio from './studio/Studio';
 import { applyTemplate, initialDesign, templates } from './studio/model';
 import { AccountMenu, AccountProvider, AuthDialog, ProjectsPage, ResetPage } from './AccountUI';
 import { DonationGoal, SiteStats } from './Stats';
+import { applyPageMeta } from './seo';
 
 function Header({ onOpenStudio, onOpenAuth }) {
   const [open, setOpen] = useState(false);
@@ -263,7 +264,10 @@ function Support({ onOpenStudio }) {
   ];
   return <section className="pricing-section" id="support"><div className="shell">
     <div className="pricing-heading">
-      <div><SectionLabel light>SUPPORT CARDPLUME</SectionLabel><h2>Free to use.<br />Free to <em>keep using.</em></h2></div>
+      {/* An h1 rather than an h2: this stopped being a strip on the home page when /support
+          became its own route, and a page whose top heading is an h2 reads as a fragment of
+          something else. */}
+      <div><SectionLabel light>SUPPORT CARDPLUME</SectionLabel><h1>Free to use.<br />Free to <em>keep using.</em></h1></div>
       <p>No plans, no accounts, no paywall. Every template, font, export and loyalty card is open to everyone. If it saved you a trip to the print shop, you can chip in — that is the whole business model.</p>
     </div>
     <div className="pricing-grid">
@@ -304,7 +308,7 @@ function Faq() {
   ];
   const [open, setOpen] = useState(0);
 
-  return <section className="faq-section" id="faq"><div className="shell faq-grid"><div><SectionLabel>GOOD QUESTIONS</SectionLabel><h2>Everything you<br />need to <em>know.</em></h2><p>Still curious? <Link to="/contact">Say hello to the Cardplume team.</Link></p></div><div className="faq-list">{questions.map((item, index) => { const answerId = `faq-answer-${index}`; const isOpen = open === index; return <article className={isOpen ? 'open' : ''} key={item.q}><button onClick={() => setOpen(isOpen ? -1 : index)} aria-expanded={isOpen} aria-controls={answerId}><span>{item.q}</span><Icon name={isOpen ? 'close' : 'plus'} size={18} /></button><div className="faq-answer" id={answerId} role="region"><p>{item.a}</p></div></article>; })}</div></div></section>;
+  return <section className="faq-section" id="faq"><div className="shell faq-grid"><div><SectionLabel>GOOD QUESTIONS</SectionLabel><h1>Everything you<br />need to <em>know.</em></h1><p>Still curious? <Link to="/contact">Say hello to the Cardplume team.</Link></p></div><div className="faq-list">{questions.map((item, index) => { const answerId = `faq-answer-${index}`; const isOpen = open === index; return <article className={isOpen ? 'open' : ''} key={item.q}><button onClick={() => setOpen(isOpen ? -1 : index)} aria-expanded={isOpen} aria-controls={answerId}><span>{item.q}</span><Icon name={isOpen ? 'close' : 'plus'} size={18} /></button><div className="faq-answer" id={answerId} role="region"><p>{item.a}</p></div></article>; })}</div></div></section>;
 }
 
 /* No backend, so the form cannot post anywhere. Rather than fake a submission, it composes
@@ -427,6 +431,10 @@ function AppShell() {
   const [auth, setAuth] = useState(null);   /* null | 'login' | 'signup' */
   const showToast = (message) => { setToast(message); window.setTimeout(() => setToast(''), 2800); };
   const openStudio = (type) => navigate(type === 'loyalty' ? '/studio?type=loyalty' : '/studio');
+
+  /* One <head> serves every route, so each navigation has to rewrite it. Without this the
+     whole site introduces itself to a crawler as the home page. */
+  useEffect(() => { applyPageMeta(location.pathname); }, [location.pathname]);
 
   useEffect(() => {
     if (location.pathname === '/support' && location.hash === '#faq') {

@@ -1,0 +1,23 @@
+# cardplume.tech
+#
+# The studio is free to use, so it is free to crawl. Nothing here is gated and
+# nothing is held back for a paid tier, which means there is no reason to keep
+# any crawler out of the pages people are actually looking for.
+#
+# This file has to exist as a real file. Without it the catch-all rewrite in
+# vercel.json answers /robots.txt with index.html, and a crawler reads a page of
+# HTML where it expected directives.
+
+User-agent: *
+Allow: /
+
+# Two routes belong to one signed-in person and hold nothing an index can use.
+# A password reset page turning up in a search result is its own small problem.
+Disallow: /projects
+Disallow: /reset
+
+# Query strings only preload a template into the studio. The page underneath is
+# the same one, so let /studio be the single crawled version of itself.
+Disallow: /studio?
+
+Sitemap: https://www.cardplume.tech/sitemap.xml
